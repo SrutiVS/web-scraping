@@ -1,0 +1,40 @@
+from bs4 import BeautifulSoup
+from html.parser import HTMLParser
+import requests
+import csv
+import pandas as pd
+
+
+URL = "https://www.amazon.in/s?k=air+fryer"
+headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"}
+
+#extracting html source code of this page
+page = requests.get(URL,headers=headers)
+#checking whether the url has any issues
+page.raise_for_status()
+#parsing the html text using html.parser
+soup = BeautifulSoup(page.text,"html.parser")
+#print(soup)
+#finding all the search items
+titles=[]
+prices=[]
+ratings=[]
+results= soup.find_all('div',{'data-component-type':'s-search-result'})
+print(len(results))
+# printing the details of the page
+
+for result in results:
+    atag=result.h2.a
+    title = atag.text.strip()
+    print(title)
+
+    price = result.find('span',{'class':'a-price'}).text
+
+    rating = result.i.text
+    titles.append(title)
+    prices.append(price)
+    ratings.append(rating)
+df = pd.DataFrame({'Product Title':titles,'Prices':prices,'Ratings':ratings})
+df.to_csv("AirFryer Amazon")
+
+    
